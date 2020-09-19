@@ -26,7 +26,7 @@
   color: #333;
 }
 
-.sidebar .nav-link .feather {
+.sidebar .nav-link {
   margin-right: 4px;
   color: #999;
 }
@@ -101,4 +101,38 @@ main {
 
 .btn {
   margin-top: 5px;
+}
+
+[data-value="extreme"] {
+  background-color: blueviolet;
+  color: white;
+}
+
+[data-value="veryhigh"] {
+  background-color: crimson;
+  color: white;
+}
+
+[data-value="high"] {
+  background-color: orange;
+  color: white;
+}
+
+[data-value="moderate"] {
+  background-color: gold;
+  color: black;
+}
+
+[data-value="low"] {
+  background-color: limegreen;
+  color: white;
+}
+
+[data-value="na"] {
+  background-color: #999;
+  color: black;
+}
+
+.unit-button-group {
+  padding-bottom: 10px;
 }
