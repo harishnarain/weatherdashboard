@@ -39,15 +39,14 @@ const unitButtonGroupEl = document.querySelector(".unit-button-group");
 
 // Functions
 const clearError = () => {
+  // Used to clear errors before retrying
   if (document.querySelector(".alert-danger")) {
     document.querySelector(".alert-danger").remove();
   }
 };
 
 const clearWeatherIcon = () => {
-  // if (document.querySelector(".weather-icon-img")) {
-  //   document.querySelector(".weather-icon-img").remove();
-  // }
+  // Need to clear existing weather icon prior rendering next city
   weatherIconEl.innerHTML = "";
 };
 
@@ -200,7 +199,9 @@ const initUnitButton = () => {
 
 // Event listeners
 clearHistoryButtonEl.addEventListener("click", () => {
-  console.log("clearing history...");
+  state.preferences.searchHistory = [];
+  saveLocalStorageState();
+  renderSearchHistory();
 });
 
 document.getElementById("search-form").addEventListener("submit", (event) => {
