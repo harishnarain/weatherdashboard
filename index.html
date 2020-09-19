@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script
+      src="https://kit.fontawesome.com/60de1ab8c4.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+      integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+      integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar nabar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="index.html">Weather Dashboard</a>
+      </nav>
+    </header>
+    <div class="container-fluid">
+      <div class="row">
+        <nav
+          class="col-md-3 sidebar col-lg-2 d-md-block bg-light collapse"
+          id="sidebarMenu"
+        >
+          <div class="sidebar-sticky pt-3">
+            <form id="search-form">
+              <div class="form-group">
+                <label for="search-input">Search for city:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search city"
+                  aria-label="City to search"
+                  aria-describedby="button-addon2"
+                  id="search-input"
+                />
+              </div>
+              <button
+                class="btn btn-secondary btn-sm btn-block"
+                type="submit"
+                id="search-button"
+                disabled
+              >
+                Search
+              </button>
+            </form>
+            <button class="btn btn-danger btn-sm btn-block" type="button" id="clear-button">Clear History</button>
+            <hr />
+            <ul class="nav flex-column" id="search-history"></ul>
+          </div>
+        </nav>
+        <div class="col-md-9">
+          <div class="container">
+            <main>
+              <div class="jumbotron">
+                <h1 class="active-city"></h1>
+                <p class="details">
+                  Temperature: <span class="temperature-text"></span>
+                </p>
+                <p class="details">
+                  Humidity: <span class="humidity-text"></span>
+                </p>
+                <p class="details">
+                  Wind Speed: <span class="wind-text"></span>
+                </p>
+                <p class="details">UV Index: <span class="uv-text"></span></p>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="assets/js/index.js"></script>
+</html>
