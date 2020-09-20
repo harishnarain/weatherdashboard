@@ -38,6 +38,7 @@ const weatherIconEl = document.querySelector(".weather-icon");
 const unitButtonGroupEl = document.querySelector(".unit-button-group");
 const futureForecastRowEl = document.querySelector(".future-forecast-row");
 const weatherDescriptionEl = document.querySelector(".weather-description");
+const findMeEl = document.getElementById("find-me");
 
 // Functions
 const clearError = () => {
@@ -232,7 +233,11 @@ const searchHandler = (city, includeInHistory = true) => {
   // or catch error
   clearError();
   clearWeatherIcon();
-  const queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${state.unitValue()}&appid=${apiKey}`;
+  typeof city === "object"
+    ? (queryParams = `lat=${city.latitude}&lon=${city.longitude}`)
+    : (queryParams = `q=${city}`);
+  //const queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${state.unitValue()}&appid=${apiKey}`;
+  const queryUrl = `https://api.openweathermap.org/data/2.5/weather?${queryParams}&units=${state.unitValue()}&appid=${apiKey}`;
   fetch(queryUrl)
     .then((res) => res.json())
     .then((data) => {
@@ -260,15 +265,19 @@ const searchHandler = (city, includeInHistory = true) => {
       }
     })
     .catch((err) => {
-      const mainEl = document.querySelector("main");
-      const alertEl = document.createElement("div");
-      alertEl.setAttribute("class", "alert alert-danger");
-      alertEl.setAttribute("role", "alert");
-      err == 404
-        ? (alertEl.textContent = `Cannot find city with name: ${city}`)
-        : (alertEl.textContent = `An error has occured with code: ${err}`);
-      mainEl.prepend(alertEl);
+      showErrorAlert(err, city);
     });
+};
+
+const showErrorAlert = (err, city) => {
+  const mainEl = document.querySelector("main");
+  const alertEl = document.createElement("div");
+  alertEl.setAttribute("class", "alert alert-danger");
+  alertEl.setAttribute("role", "alert");
+  err == 404
+    ? (alertEl.textContent = `Cannot find city with name: ${city}`)
+    : (alertEl.textContent = `An error has occured with status: ${err}`);
+  mainEl.prepend(alertEl);
 };
 
 const getItemHandler = (item) => {
@@ -288,6 +297,23 @@ const initUnitButton = () => {
   state.preferences.metric
     ? document.getElementById("metric-button").setAttribute("checked", "")
     : document.getElementById("imperial-button").setAttribute("checked", "");
+};
+
+const findMe = () => {
+  const success = (position) => {
+    console.log(position.coords.latitude, position.coords.longitude);
+    const city = {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+    };
+    searchHandler(city);
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    success,
+    showErrorAlert("Unable to retrieve your location!"),
+    { timeout: 30000, enableHighAccuracy: true, maximumAge: 75000 }
+  );
 };
 
 // Event listeners
@@ -335,6 +361,8 @@ unitButtonGroupEl.addEventListener("click", (event) => {
   }
 });
 
+findMeEl.addEventListener("click", () => findMe());
+
 // Main program
 // Pull search history array from localStorage
 // Pull last city from localStorage
@@ -344,8 +372,9 @@ if (localStorage.getItem("weatherAppPreferences")) {
   initUnitButton();
   renderSearchHistory();
 } else {
-  state.preferences.currentCity = "Vancouver";
+  //state.preferences.currentCity = "Vancouver";
   state.preferences.metric = true;
+  findMe();
   initUnitButton();
-  searchHandler(state.preferences.currentCity, false);
+  //searchHandler(state.preferences.currentCity, false);
 }
