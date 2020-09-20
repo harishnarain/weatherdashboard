@@ -306,7 +306,7 @@ const findMe = () => {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
     };
-    searchHandler(city);
+    searchHandler(city, true);
   };
 
   navigator.geolocation.getCurrentPosition(
@@ -372,9 +372,8 @@ if (localStorage.getItem("weatherAppPreferences")) {
   initUnitButton();
   renderSearchHistory();
 } else {
-  //state.preferences.currentCity = "Vancouver";
+  // use FindMe if localStorage is absent;
   state.preferences.metric = true;
   findMe();
   initUnitButton();
-  //searchHandler(state.preferences.currentCity, false);
 }
