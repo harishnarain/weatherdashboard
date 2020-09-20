@@ -83,6 +83,7 @@ main {
 .jumbotron {
   animation: slideUp 1.5s forwards;
   padding: 2rem 2rem !important;
+  background-color: powderblue !important;
 }
 
 .active-city {
@@ -135,4 +136,18 @@ main {
 
 .unit-button-group {
   padding-bottom: 10px;
+}
+
+.card {
+  max-width: 18rem;
+  margin: 10px;
+}
+
+.weather-description {
+  font-size: x-large;
+  text-transform: capitalize;
+}
+
+.card-body {
+  background-color: lightblue;
 }

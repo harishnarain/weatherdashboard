@@ -94,11 +94,8 @@
               <div class="jumbotron">
                 <div class="container">
                   <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                       <h1 class="active-city display-4"></h1>
-                    </div>
-                    <div class="col-md-6">
-                      <h6 class="current-date"></h6>
                     </div>
                   </div>
                   <div class="row">
@@ -120,10 +117,28 @@
                         </div>
                       </div>
                     </div>
-                    <div class="col-md-6 weather-icon"></div>
+                    <div class="col-md-6">
+                      <div class="row">
+                        <div class="col-md-12 weather-icon"></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-12 weather-description"></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="current-date"></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="row">
+                <div class=col-md-12>
+                  <h4>5-Day forecast:</h4>
+                </div>
+              </div>
+              <div class="row future-forecast-row"></div>
             </main>
           </div>
         </div>
@@ -135,5 +150,6 @@
     integrity="sha512-Q1f3TS3vSt1jQ8AwP2OuenztnLU6LwxgyyYOG1jgMW/cbEMHps/3wjvnl1P3WTrF3chJUWEoxDUEjMxDV8pujg=="
     crossorigin="anonymous"
   ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.31/moment-timezone-with-data-2012-2022.js" integrity="sha512-v6ox3Qn6udc+GWEnOS6euQx7U4q+pRdFs1xSffgBf2hjOTeC9CX04OEa1UqcjynGN121ERvz2wpsE8RpLAyWWg==" crossorigin="anonymous"></script>
   <script src="assets/js/index.js"></script>
 </html>

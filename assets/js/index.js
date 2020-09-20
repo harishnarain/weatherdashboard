@@ -36,6 +36,8 @@ const searchHistoryEl = document.getElementById("search-history");
 const clearHistoryButtonEl = document.getElementById("clear-button");
 const weatherIconEl = document.querySelector(".weather-icon");
 const unitButtonGroupEl = document.querySelector(".unit-button-group");
+const futureForecastRowEl = document.querySelector(".future-forecast-row");
+const weatherDescriptionEl = document.querySelector(".weather-description");
 
 // Functions
 const clearError = () => {
@@ -48,6 +50,12 @@ const clearError = () => {
 const clearWeatherIcon = () => {
   // Need to clear existing weather icon prior rendering next city
   weatherIconEl.innerHTML = "";
+  weatherDescriptionEl.innerHTML = "";
+};
+
+const clearForecast = () => {
+  // Need to clear existing future forecast
+  futureForecastRowEl.innerHTML = "";
 };
 
 const renderSearchHistory = () => {
@@ -75,9 +83,13 @@ const addToSearchHistory = (city) => {
   }
 };
 
-const renderCurrentDate = () => {
-  const currentDate = moment().format("dddd, MMMM Do YYYY, h:mm a");
-  document.querySelector(".current-date").textContent = currentDate;
+const renderCurrentDate = (dateTime) => {
+  const currentDate = moment
+    .unix(dateTime)
+    .format("dddd, MMMM Do YYYY, h:mm a");
+  const timeZone = moment.tz(moment.tz.guess()).zoneAbbr();
+  document.querySelector(".current-date").textContent =
+    currentDate + " " + timeZone;
 };
 
 const saveLocalStorageState = () => {
@@ -87,7 +99,47 @@ const saveLocalStorageState = () => {
   );
 };
 
-const renderCurrent = (name, temp, humidity, windSpeed, icon) => {
+const createFutureCard = (dateTime, temp, humidity, icon) => {
+  const date = moment.unix(dateTime).format("M/D/YYYY");
+  const cardColEl = document.createElement("div");
+  cardColEl.setAttribute("class", "col");
+  const cardEl = document.createElement("div");
+  cardEl.setAttribute("class", "card bg-light mb-3");
+  // const cardHeaderEl = document.createElement("div");
+  // cardHeaderEl.setAttribute("class", "card-header");
+  // cardHeaderEl.textContent = "Date";
+  // cardEl.appendChild(cardHeaderEl);
+  const cardBodyEl = document.createElement("div");
+  cardBodyEl.setAttribute("class", "card-body");
+  const cardTitleEl = document.createElement("h5");
+  cardTitleEl.setAttribute("class", "card-title");
+  cardTitleEl.textContent = date;
+  cardBodyEl.appendChild(cardTitleEl);
+  const cardWeatherIconEl = document.createElement("img");
+  cardWeatherIconEl.src = `http://openweathermap.org/img/wn/${icon}.png`;
+  cardWeatherIconEl.alt = "weather-icon";
+  cardBodyEl.appendChild(cardWeatherIconEl);
+  const cardTempEl = document.createElement("p");
+  cardTempEl.setAttribute("class", "card-temptext");
+  cardTempEl.textContent = temp + state.tempUnit();
+  cardBodyEl.appendChild(cardTempEl);
+  const cardHumEl = document.createElement("p");
+  cardHumEl.textContent = humidity + " %";
+  cardBodyEl.appendChild(cardHumEl);
+  cardEl.appendChild(cardBodyEl);
+  cardColEl.appendChild(cardEl);
+  futureForecastRowEl.appendChild(cardColEl);
+};
+
+const renderCurrent = (
+  name,
+  temp,
+  humidity,
+  windSpeed,
+  icon,
+  description,
+  dateTime
+) => {
   document.querySelector(".active-city").textContent = name;
   document.querySelector(".temperature-text").textContent =
     temp + state.tempUnit();
@@ -100,7 +152,8 @@ const renderCurrent = (name, temp, humidity, windSpeed, icon) => {
   weatherIconImageEl.alt = "weather-icon";
   weatherIconImageEl.setAttribute("class", "weather-icon-img");
   weatherIconEl.appendChild(weatherIconImageEl);
-  renderCurrentDate();
+  weatherDescriptionEl.textContent = description;
+  renderCurrentDate(dateTime);
   searchInputEl.value = "";
 };
 
@@ -133,6 +186,42 @@ const getUVIndex = (latitude, longitude) => {
     });
 };
 
+const localizeAndFilter = (tzOffset, fullForecast) => {
+  // Store day of first element so to know how much to advance for forecast
+  let selectedForecast = [];
+  let advanceCounter = 0;
+  for (i = 0; i < 5; i++) {
+    const selectedDay = {};
+    selectedDay.dt = fullForecast[advanceCounter].dt;
+    selectedDay.temp = fullForecast[advanceCounter].main.temp;
+    selectedDay.humidity = fullForecast[advanceCounter].main.humidity;
+    selectedDay.weathericon = fullForecast[advanceCounter].weather[0].icon;
+    selectedForecast.push(selectedDay);
+    advanceCounter += 8;
+  }
+  return selectedForecast;
+};
+
+const getFuture = (city) => {
+  clearForecast();
+  const queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${state.unitValue()}&appid=${apiKey}`;
+  fetch(queryUrl)
+    .then((res) => res.json())
+    .then((data) => {
+      // process all dates and create an array for 5 days
+      const forecast = localizeAndFilter(data.city.timezone, data.list);
+      // foreach element in array run createfuturecard
+      forecast.forEach((element) => {
+        createFutureCard(
+          element.dt,
+          element.temp,
+          element.humidity,
+          element.weathericon
+        );
+      });
+    });
+};
+
 const searchHandler = (city, includeInHistory = true) => {
   //addToSearchHistory(searchInputEl.value);
   // fetch api
@@ -149,14 +238,18 @@ const searchHandler = (city, includeInHistory = true) => {
     .then((data) => {
       if (data.cod === 200) {
         state.preferences.currentCity = data.name;
+        searchButtonEl.disabled = true;
         saveLocalStorageState();
         getUVIndex(data.coord.lat, data.coord.lon);
+        getFuture(data.name);
         renderCurrent(
           data.name,
           data.main.temp,
           data.main.humidity,
           data.wind.speed,
-          data.weather[0].icon
+          data.weather[0].icon,
+          data.weather[0].description,
+          data.dt
         );
       } else {
         throw data.cod;
