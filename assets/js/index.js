@@ -117,7 +117,7 @@ const createFutureCard = (dateTime, temp, humidity, icon) => {
   cardTitleEl.textContent = date;
   cardBodyEl.appendChild(cardTitleEl);
   const cardWeatherIconEl = document.createElement("img");
-  cardWeatherIconEl.src = `http://openweathermap.org/img/wn/${icon}.png`;
+  cardWeatherIconEl.src = `https://openweathermap.org/img/wn/${icon}.png`;
   cardWeatherIconEl.alt = "weather-icon";
   cardBodyEl.appendChild(cardWeatherIconEl);
   const cardTempEl = document.createElement("p");
@@ -149,7 +149,7 @@ const renderCurrent = (
     windSpeed + state.windUnit();
 
   const weatherIconImageEl = document.createElement("img");
-  weatherIconImageEl.src = `http://openweathermap.org/img/wn/${icon}@2x.png`;
+  weatherIconImageEl.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
   weatherIconImageEl.alt = "weather-icon";
   weatherIconImageEl.setAttribute("class", "weather-icon-img");
   weatherIconEl.appendChild(weatherIconImageEl);
@@ -179,7 +179,7 @@ const renderUV = (value) => {
 };
 
 const getUVIndex = (latitude, longitude) => {
-  const queryUrl = `http://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+  const queryUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
   fetch(queryUrl)
     .then((res) => res.json())
     .then((data) => {
