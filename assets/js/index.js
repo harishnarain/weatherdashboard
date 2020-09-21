@@ -106,10 +106,6 @@ const createFutureCard = (dateTime, temp, humidity, icon) => {
   cardColEl.setAttribute("class", "col");
   const cardEl = document.createElement("div");
   cardEl.setAttribute("class", "card bg-light mb-3");
-  // const cardHeaderEl = document.createElement("div");
-  // cardHeaderEl.setAttribute("class", "card-header");
-  // cardHeaderEl.textContent = "Date";
-  // cardEl.appendChild(cardHeaderEl);
   const cardBodyEl = document.createElement("div");
   cardBodyEl.setAttribute("class", "card-body");
   const cardTitleEl = document.createElement("h5");
@@ -122,10 +118,10 @@ const createFutureCard = (dateTime, temp, humidity, icon) => {
   cardBodyEl.appendChild(cardWeatherIconEl);
   const cardTempEl = document.createElement("p");
   cardTempEl.setAttribute("class", "card-temptext");
-  cardTempEl.textContent = temp + state.tempUnit();
+  cardTempEl.textContent = "T: " + temp + state.tempUnit();
   cardBodyEl.appendChild(cardTempEl);
   const cardHumEl = document.createElement("p");
-  cardHumEl.textContent = humidity + " %";
+  cardHumEl.textContent = "H: " + humidity + " %";
   cardBodyEl.appendChild(cardHumEl);
   cardEl.appendChild(cardBodyEl);
   cardColEl.appendChild(cardEl);
@@ -236,7 +232,6 @@ const searchHandler = (city, includeInHistory = true) => {
   typeof city === "object"
     ? (queryParams = `lat=${city.latitude}&lon=${city.longitude}`)
     : (queryParams = `q=${city}`);
-  //const queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${state.unitValue()}&appid=${apiKey}`;
   const queryUrl = `https://api.openweathermap.org/data/2.5/weather?${queryParams}&units=${state.unitValue()}&appid=${apiKey}`;
   fetch(queryUrl)
     .then((res) => res.json())
