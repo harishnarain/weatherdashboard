@@ -294,8 +294,9 @@ const getItemHandler = (query, queryType) => {
 };
 
 const deleteItemHandler = (id) => {
+  console.log(state.preferences.searchHistory.findIndex(element => element.id == id));
   state.preferences.searchHistory.splice(
-    state.preferences.searchHistory.findIndex((element) => element.id === id),
+    state.preferences.searchHistory.findIndex((element) => element.id == id),
     1
   );
   saveLocalStorageState();
