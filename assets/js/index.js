@@ -66,8 +66,8 @@ const renderSearchHistory = () => {
   state.preferences.searchHistory.forEach((el) => {
     const liEl = document.createElement("li");
     liEl.setAttribute("class", "nav-item search-item");
-    liEl.setAttribute("data-value", el);
-    liEl.textContent = el;
+    liEl.setAttribute("data-value", el.id);
+    liEl.textContent = `${el.name}, ${el.country}`;
     const delEl = document.createElement("i");
     delEl.setAttribute("class", "fas fa-trash");
     delEl.setAttribute("data-action", "delete");
@@ -76,9 +76,9 @@ const renderSearchHistory = () => {
   });
 };
 
-const addToSearchHistory = (city) => {
-  if (!state.preferences.searchHistory.includes(city)) {
-    state.preferences.searchHistory.push(city);
+const addToSearchHistory = (id, name, country) => {
+  if (!state.preferences.searchHistory.find(element => element.id === id)) {
+    state.preferences.searchHistory.push({id: id, name: name, country: country});
     saveLocalStorageState();
     renderSearchHistory();
   }
@@ -130,6 +130,7 @@ const createFutureCard = (dateTime, temp, humidity, icon) => {
 
 const renderCurrent = (
   name,
+  country,
   temp,
   humidity,
   windSpeed,
@@ -137,7 +138,7 @@ const renderCurrent = (
   description,
   dateTime
 ) => {
-  document.querySelector(".active-city").textContent = name;
+  document.querySelector(".active-city").textContent = `${name}, ${country}`;
   document.querySelector(".temperature-text").textContent =
     temp + state.tempUnit();
   document.querySelector(".humidity-text").textContent = humidity + " %";
@@ -199,9 +200,10 @@ const localizeAndFilter = (tzOffset, fullForecast) => {
   return selectedForecast;
 };
 
-const getFuture = (city) => {
+const getFuture = (id) => {
   clearForecast();
-  const queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${state.unitValue()}&appid=${apiKey}`;
+  const queryParams = `id=${id}`;
+  const queryUrl = `https://api.openweathermap.org/data/2.5/forecast?${queryParams}&units=${state.unitValue()}&appid=${apiKey}`;
   fetch(queryUrl)
     .then((res) => res.json())
     .then((data) => {
@@ -219,7 +221,7 @@ const getFuture = (city) => {
     });
 };
 
-const searchHandler = (city, includeInHistory = true) => {
+const searchHandler = (query, queryType, includeInHistory = true) => {
   //addToSearchHistory(searchInputEl.value);
   // fetch api
   // then process request
@@ -229,21 +231,29 @@ const searchHandler = (city, includeInHistory = true) => {
   // or catch error
   clearError();
   clearWeatherIcon();
-  typeof city === "object"
-    ? (queryParams = `lat=${city.latitude}&lon=${city.longitude}`)
-    : (queryParams = `q=${city}`);
+  switch(queryType) {
+    case "id":
+      queryParams = `id=${query}`;
+      break;
+    case "position":
+      queryParams = `lat=${query.latitude}&lon=${query.longitude}`;
+      break;
+    default:
+      queryParams = `q=${query}`;
+  }
   const queryUrl = `https://api.openweathermap.org/data/2.5/weather?${queryParams}&units=${state.unitValue()}&appid=${apiKey}`;
   fetch(queryUrl)
     .then((res) => res.json())
     .then((data) => {
       if (data.cod === 200) {
-        state.preferences.currentCity = data.name;
+        state.preferences.currentCity = data.id;
         searchButtonEl.disabled = true;
         saveLocalStorageState();
         getUVIndex(data.coord.lat, data.coord.lon);
-        getFuture(data.name);
+        getFuture(data.id);
         renderCurrent(
           data.name,
+          data.sys.country,
           data.main.temp,
           data.main.humidity,
           data.wind.speed,
@@ -255,33 +265,33 @@ const searchHandler = (city, includeInHistory = true) => {
         throw data.cod;
       }
       if (includeInHistory) {
-        addToSearchHistory(data.name);
+        addToSearchHistory(data.id, data.name, data.sys.country);
         saveLocalStorageState();
       }
     })
     .catch((err) => {
-      showErrorAlert(err, city);
+      showErrorAlert(err, query);
     });
 };
 
-const showErrorAlert = (err, city) => {
+const showErrorAlert = (err, query) => {
   const mainEl = document.querySelector("main");
   const alertEl = document.createElement("div");
   alertEl.setAttribute("class", "alert alert-danger");
   alertEl.setAttribute("role", "alert");
   err == 404
-    ? (alertEl.textContent = `Cannot find city with name: ${city}`)
+    ? (alertEl.textContent = `Cannot find city with name: ${query}`)
     : (alertEl.textContent = `An error has occured with status: ${err}`);
   mainEl.prepend(alertEl);
 };
 
-const getItemHandler = (item) => {
-  searchHandler(item, false);
+const getItemHandler = (query, queryType) => {
+  searchHandler(query, queryType, false);
 };
 
-const deleteItemHandler = (item) => {
+const deleteItemHandler = (id) => {
   state.preferences.searchHistory.splice(
-    state.preferences.searchHistory.indexOf(item),
+    state.preferences.searchHistory.findIndex(element => element.id === id),
     1
   );
   saveLocalStorageState();
@@ -296,12 +306,11 @@ const initUnitButton = () => {
 
 const findMe = () => {
   const success = (position) => {
-    console.log(position.coords.latitude, position.coords.longitude);
     const city = {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
     };
-    searchHandler(city, true);
+    searchHandler(city, "position", true);
   };
 
   navigator.geolocation.getCurrentPosition(
@@ -320,13 +329,13 @@ clearHistoryButtonEl.addEventListener("click", () => {
 
 document.getElementById("search-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  searchHandler(searchInputEl.value);
+  searchHandler(searchInputEl.value, "name", true);
 });
 
 searchHistoryEl.addEventListener("click", (event) => {
   event.target.getAttribute("data-action")
     ? deleteItemHandler(event.target.parentElement.getAttribute("data-value"))
-    : getItemHandler(event.target.getAttribute("data-value"));
+    : getItemHandler(event.target.getAttribute("data-value"), "id");
 });
 
 searchInputEl.addEventListener("keyup", () => {
@@ -346,11 +355,11 @@ unitButtonGroupEl.addEventListener("click", (event) => {
     switch (event.target.getAttribute("data-value")) {
       case "imperial":
         state.preferences.metric = false;
-        searchHandler(state.preferences.currentCity, false);
+        searchHandler(state.preferences.currentCity, "id", false);
         break;
       default:
         state.preferences.metric = true;
-        searchHandler(state.preferences.currentCity, false);
+        searchHandler(state.preferences.currentCity, "id", false);
         break;
     }
   }
@@ -363,7 +372,7 @@ findMeEl.addEventListener("click", () => findMe());
 // Pull last city from localStorage
 if (localStorage.getItem("weatherAppPreferences")) {
   state.preferences = JSON.parse(localStorage.getItem("weatherAppPreferences"));
-  searchHandler(state.preferences.currentCity, false);
+  searchHandler(state.preferences.currentCity, "id", false);
   initUnitButton();
   renderSearchHistory();
 } else {
