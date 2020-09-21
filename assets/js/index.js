@@ -77,8 +77,12 @@ const renderSearchHistory = () => {
 };
 
 const addToSearchHistory = (id, name, country) => {
-  if (!state.preferences.searchHistory.find(element => element.id === id)) {
-    state.preferences.searchHistory.push({id: id, name: name, country: country});
+  if (!state.preferences.searchHistory.find((element) => element.id === id)) {
+    state.preferences.searchHistory.push({
+      id: id,
+      name: name,
+      country: country,
+    });
     saveLocalStorageState();
     renderSearchHistory();
   }
@@ -231,7 +235,7 @@ const searchHandler = (query, queryType, includeInHistory = true) => {
   // or catch error
   clearError();
   clearWeatherIcon();
-  switch(queryType) {
+  switch (queryType) {
     case "id":
       queryParams = `id=${query}`;
       break;
@@ -291,7 +295,7 @@ const getItemHandler = (query, queryType) => {
 
 const deleteItemHandler = (id) => {
   state.preferences.searchHistory.splice(
-    state.preferences.searchHistory.findIndex(element => element.id === id),
+    state.preferences.searchHistory.findIndex((element) => element.id === id),
     1
   );
   saveLocalStorageState();
@@ -304,20 +308,42 @@ const initUnitButton = () => {
     : document.getElementById("imperial-button").setAttribute("checked", "");
 };
 
-const findMe = () => {
-  const success = (position) => {
-    const city = {
+const sendGeoLocationCoordinates = (position) => {
+  searchHandler(
+    {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude,
-    };
-    searchHandler(city, "position", true);
-  };
-
-  navigator.geolocation.getCurrentPosition(
-    success,
-    showErrorAlert("Unable to retrieve your location!"),
-    { timeout: 30000, enableHighAccuracy: true, maximumAge: 75000 }
+    },
+    "position",
+    true
   );
+};
+
+const geoLocationErrorHandler = (err) => {
+  switch (err.code) {
+    case err.PERMISSION_DENIED:
+      showErrorAlert("Geolocation request denied.");
+      break;
+    case err.POSITION_UNAVAILABLE:
+      showErrorAlert("Location information is unavailable.");
+      break;
+    case err.TIMEOUT:
+      showErrorAlert("Geolocation request timed out.");
+      break;
+    case err.UNKNOWN_ERROR:
+      showErrorAlert("An unknown error has occured.");
+      break;
+  }
+};
+
+const findMeHandler = () => {
+  if (navigator.geolocation) {
+    clearError();
+    navigator.geolocation.getCurrentPosition(
+      sendGeoLocationCoordinates,
+      geoLocationErrorHandler
+    );
+  }
 };
 
 // Event listeners
@@ -365,7 +391,7 @@ unitButtonGroupEl.addEventListener("click", (event) => {
   }
 });
 
-findMeEl.addEventListener("click", () => findMe());
+findMeEl.addEventListener("click", () => findMeHandler());
 
 // Main program
 // Pull search history array from localStorage
@@ -378,6 +404,6 @@ if (localStorage.getItem("weatherAppPreferences")) {
 } else {
   // use FindMe if localStorage is absent;
   state.preferences.metric = true;
-  findMe();
+  findMeHandler();
   initUnitButton();
 }
