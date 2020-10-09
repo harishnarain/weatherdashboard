@@ -43,7 +43,7 @@ Please visit the [site](https://www.harishnarain.com/weatherdashboard/) hosted o
 
 
 ## License
-Due to the nature of this exercise, no license has been included.
+MIT License
 
 ## 3rd party libraries and APIs used
 * [OpenWeather](https://openweathermap.org/) - OpenWeather API
